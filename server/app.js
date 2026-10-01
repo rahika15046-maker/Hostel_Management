@@ -1,0 +1,13 @@
+const express = require('express'), helmet = require('helmet'), cors = require('cors'), rateLimit = require('express-rate-limit');
+const { notFound, errorHandler } = require('./middleware/error');
+const app = express();
+app.set('trust proxy', 1);
+app.use(helmet());
+const origins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map(s => s.trim());
+app.use(cors({ origin: origins }));
+app.use(express.json({ limit: '50kb' }));
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true }));
+app.get('/api/health', (req, res) => res.json({ success: true, message: 'ok' }));
+app.use('/api', require('./routes'));
+app.use(notFound); app.use(errorHandler);
+module.exports = app;

@@ -1,0 +1,16 @@
+const r = require('express').Router();
+const { authenticate, authorize } = require('../middleware/auth');
+const auth = require('../controllers/auth'), rooms = require('../controllers/rooms'), al = require('../controllers/allocations');
+r.post('/auth/register', auth.register);
+r.post('/auth/login', auth.login);
+r.get('/auth/me', authenticate, auth.me);
+r.post('/rooms', authenticate, authorize('warden'), rooms.create);
+r.get('/rooms/stats', authenticate, authorize('warden'), rooms.stats);
+r.get('/rooms/available', authenticate, rooms.available);
+r.get('/rooms', authenticate, rooms.list);
+r.get('/rooms/:id', authenticate, rooms.get);
+r.post('/allocations/book', authenticate, authorize('student'), al.book);
+r.get('/allocations/me', authenticate, authorize('student'), al.mine);
+r.get('/allocations', authenticate, authorize('warden'), al.all);
+r.get('/allocations/room/:roomId', authenticate, authorize('warden'), al.byRoom);
+module.exports = r;
